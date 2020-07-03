@@ -6,6 +6,7 @@ package xorm
 
 import (
 	"strings"
+	"xorm.io/xorm/internal/utils"
 	"xorm.io/xorm/schemas"
 )
 
@@ -14,53 +15,8 @@ type TableStruct struct {
 	Columns    []*schemas.Column
 }
 
-func (session *Session) createTable3(bean *schemas.Table) error {
-
-	session.statement.RefTable = bean
-	session.statement.SetTableName(bean.Name)
-
-	sqlStrs := session.statement.GenCreateTableSQL()
-	for _, s := range sqlStrs {
-		_, err := session.exec(s)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (session *Session) createUniques3(bean *schemas.Table) error {
-
-	session.statement.RefTable = bean
-	session.statement.SetTableName(bean.Name)
-
-	sqls := session.statement.GenUniqueSQL()
-	for _, sqlStr := range sqls {
-		_, err := session.exec(sqlStr)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (session *Session) createIndexes3(bean *schemas.Table) error {
-
-	session.statement.RefTable = bean
-	session.statement.SetTableName(bean.Name)
-
-	sqls := session.statement.GenIndexSQL()
-	for _, sqlStr := range sqls {
-		_, err := session.exec(sqlStr)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // Sync3 synchronize structs to database tables
-func (session *Session) Sync3(beans ...*schemas.Table) error {
+func (session *Session) Sync3(beans ...interface{}) error {
 	engine := session.engine
 
 	if session.isAutoClose {
@@ -79,12 +35,17 @@ func (session *Session) Sync3(beans ...*schemas.Table) error {
 		session.resetStatement()
 	}()
 
-	for _, table := range beans {
+	for _, bean := range beans {
+		v := utils.ReflectValue(bean)
+		table, err := engine.tagParser.ParseWithCache(v)
+		if err != nil {
+			return err
+		}
 		var tbName string
 		if len(session.statement.AltTableName) > 0 {
 			tbName = session.statement.AltTableName
 		} else {
-			tbName = table.Name
+			tbName = engine.TableName(bean)
 		}
 		tbNameWithSchema := engine.tbNameWithSchema(tbName)
 
@@ -98,17 +59,17 @@ func (session *Session) Sync3(beans ...*schemas.Table) error {
 
 		// this is a new table
 		if oriTable == nil {
-			err = session.StoreEngine(session.statement.StoreEngine).createTable3(table)
+			err = session.StoreEngine(session.statement.StoreEngine).createTable(bean)
 			if err != nil {
 				return err
 			}
 
-			err = session.createUniques3(table)
+			err = session.createUniques(bean)
 			if err != nil {
 				return err
 			}
 
-			err = session.createIndexes3(table)
+			err = session.createIndexes(bean)
 			if err != nil {
 				return err
 			}
