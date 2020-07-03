@@ -971,7 +971,7 @@ func (engine *Engine) Sync2(beans ...interface{}) error {
 }
 
 // Sync3 synchronize structs to database tables
-func (engine *Engine) Sync3(beans ...*schemas.Table) error {
+func (engine *Engine) Sync3(beans ...interface{}) error {
 	s := engine.NewSession()
 	defer s.Close()
 	return s.Sync3(beans...)
