@@ -289,7 +289,7 @@ func (db *mysql) AutoIncrStr() string {
 func (db *mysql) IndexCheckSQL(tableName, idxName string) (string, []interface{}) {
 	args := []interface{}{db.uri.DBName, tableName, idxName}
 	sql := "SELECT `INDEX_NAME` FROM `INFORMATION_SCHEMA`.`STATISTICS`"
-	sql += " WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `INDEX_NAME`=?"
+	sql += " WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `INDEX_NAME`=? ORDER BY `SEQ_IN_INDEX` ASC"
 	return sql, args
 }
 
@@ -500,7 +500,7 @@ func (db *mysql) SetQuotePolicy(quotePolicy QuotePolicy) {
 
 func (db *mysql) GetIndexes(queryer core.Queryer, ctx context.Context, tableName string) (map[string]*schemas.Index, error) {
 	args := []interface{}{db.uri.DBName, tableName}
-	s := "SELECT `INDEX_NAME`, `NON_UNIQUE`, `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ?"
+	s := "SELECT `INDEX_NAME`, `NON_UNIQUE`, `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? ORDER BY `SEQ_IN_INDEX` ASC"
 
 	rows, err := queryer.QueryContext(ctx, s, args...)
 	if err != nil {
