@@ -11,7 +11,7 @@ import (
 
 type TableStruct struct {
 	*schemas.Table
-	Columns    []*schemas.Column
+	Columns []*schemas.Column
 }
 
 func (session *Session) createTable3(bean *schemas.Table) error {
@@ -88,8 +88,6 @@ func (session *Session) Sync3(beans ...interface{}) error {
 			tbName = table.Name
 		}
 		tbNameWithSchema := engine.tbNameWithSchema(tbName)
-
-
 
 		var oriTable *schemas.Table
 		for _, tb := range tables {
@@ -236,15 +234,15 @@ func (session *Session) Sync3(beans ...interface{}) error {
 			}
 		}
 
-		for name2, index2 := range oriTable.Indexes {
-			if _, ok := foundIndexNames[name2]; !ok {
-				sql := engine.dialect.DropIndexSQL(tbNameWithSchema, index2)
-				_, err = session.exec(sql)
-				if err != nil {
-					return err
-				}
-			}
-		}
+		//for name2, index2 := range oriTable.Indexes {
+		//	if _, ok := foundIndexNames[name2]; !ok {
+		//		sql := engine.dialect.DropIndexSQL(tbNameWithSchema, index2)
+		//		_, err = session.exec(sql)
+		//		if err != nil {
+		//			return err
+		//		}
+		//	}
+		//}
 
 		for name, index := range addedNames {
 			if index.Type == schemas.UniqueType {

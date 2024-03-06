@@ -400,15 +400,15 @@ func (session *Session) Sync2(beans ...interface{}) error {
 			}
 		}
 
-		//for name2, index2 := range oriTable.Indexes {
-		//	if _, ok := foundIndexNames[name2]; !ok {
-		//		sql := engine.dialect.DropIndexSQL(tbNameWithSchema, index2)
-		//		_, err = session.exec(sql)
-		//		if err != nil {
-		//			return err
-		//		}
-		//	}
-		//}
+		for name2, index2 := range oriTable.Indexes {
+			if _, ok := foundIndexNames[name2]; !ok {
+				sql := engine.dialect.DropIndexSQL(tbNameWithSchema, index2)
+				_, err = session.exec(sql)
+				if err != nil {
+					return err
+				}
+			}
+		}
 
 		for name, index := range addedNames {
 			if index.Type == schemas.UniqueType {
